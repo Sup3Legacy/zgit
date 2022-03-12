@@ -37,6 +37,16 @@ pub const ConfigParser = struct {
             this.children.getPtr(t).?.write(writer);
         }
     }
+
+    pub fn write_file(this: *@This(), path: []const u8) void {
+        var file = std.fs.openFileAbsolute(path, .{ .write = true }) catch unreachable;
+        this.write(file.writer());
+    }
+
+    pub fn read(this: *@This(), reader: anytype) void {
+        _ = this;
+        _ = reader;
+    }
 };
 
 pub const Title = struct {
