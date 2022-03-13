@@ -2,6 +2,8 @@ const std = @import("std");
 
 const debug = std.debug;
 
+pub const ConfigError = error{ IllFormedValue, OrphanValue };
+
 pub const ConfigParser = struct {
     const children_type = std.StringArrayHashMap(Title);
     children: children_type,
@@ -45,13 +47,13 @@ pub const ConfigParser = struct {
         this.write(file.writer());
     }
 
-    pub fn read(this: *@This(), reader: anytype) void {
+    pub fn read(this: *@This(), reader: anytype) ConfigError!void {
         const to_trim = [_]u8{ '\t', '\n', ' ' };
         const to_trimm_header = [_]u8{ '[', ']', '\t', '\n', ' ' };
 
         const to_trim_key = [_]u8{ '\t', ' ' };
         const to_trim_value = [_]u8{ '\t', '\n', ' ', '=', '\"' };
-        const to_trim_quote = [_]u8{ '\"' };
+        const to_trim_quote = [_]u8{'\"'};
 
         //var under_slices = std.ArrayList([]const u8).init(this.alloc);
         var last_header: ?*Title = null;
@@ -59,7 +61,6 @@ pub const ConfigParser = struct {
         while (true) {
             if (reader.readUntilDelimiterAlloc(this.alloc, '\n', 256)) |line| {
                 var trimmed = std.mem.trim(u8, line[0..line.len], to_trim[0..]);
-                //debug.print("{s}", .{trimmed});
                 if (trimmed.len > 0 and trimmed[0] == '[') {
                     var title = std.mem.trim(u8, line[0..line.len], to_trimm_header[0..]);
                     last_header = this.get(title);
@@ -73,24 +74,23 @@ pub const ConfigParser = struct {
                         if (last_header) |header| {
                             header.set(key, val);
                         } else {
-                            // No header yet
+                            return ConfigError.OrphanValue;
                         }
                     } else {
-                        // Ill-formed input. 
-                        // Might wanna error
+                        return ConfigError.IllFormedValue;
                     }
-                } 
+                }
             } else |_| {
                 break;
             }
         }
     }
 
-    pub fn read_file(this: *@This(), path: []const u8) void {
-        var file = std.fs.openFileAbsolute(path, .{
+    pub fn read_file(this: *@This(), path: []const u8) anyerror!void {
+        var file = try std.fs.openFileAbsolute(path, .{
             .read = true,
-        }) catch unreachable;
-        this.read(file.reader());
+        });
+        return this.read(file.reader());
     }
 
     pub fn free(this: *@This()) void {

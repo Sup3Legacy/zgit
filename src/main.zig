@@ -18,7 +18,7 @@ pub fn main() anyerror!void {
 
     //parser = config.ConfigParser.new(alloc);
     
-    parser.read_file("/home/cst1/Documents/Projets/zgit/src/lib/test.conf");
+    try parser.read_file("/home/cst1/Documents/Projets/zgit/src/lib/test.conf");
     parser.write(std.io.getStdOut().writer());
 
     const params = comptime [_]clap.Param(clap.Help){
