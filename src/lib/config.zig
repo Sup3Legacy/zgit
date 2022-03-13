@@ -51,8 +51,9 @@ pub const ConfigParser = struct {
 
         const to_trim_key = [_]u8{ '\t', ' ' };
         const to_trim_value = [_]u8{ '\t', '\n', ' ', '=', '\"' };
+        const to_trim_quote = [_]u8{ '\"' };
 
-        var under_slices = std.ArrayList([]const u8).init(this.alloc);
+        //var under_slices = std.ArrayList([]const u8).init(this.alloc);
         var last_header: ?*Title = null;
 
         while (true) {
@@ -66,9 +67,14 @@ pub const ConfigParser = struct {
                     // Try and see if an allocation is possible
                     var equals_pos = std.mem.indexOfScalar(u8, trimmed, '=');
                     if (equals_pos) |p| {
-                        var key = std.mem.trim(u8, trimmed[0..pos], to_trim_key[0..]);
-                        var val = std.mem.trim(u8, trimmed[pos..], to_trim_value[0..]);
-
+                        var key = std.mem.trim(u8, trimmed[0..p], to_trim_key[0..]);
+                        var val_with_quote = std.mem.trim(u8, trimmed[p..], to_trim_value[0..]);
+                        var val = std.mem.trim(u8, val_with_quote, to_trim_quote[0..]);
+                        if (last_header) |header| {
+                            header.set(key, val);
+                        } else {
+                            // No header yet
+                        }
                     } else {
                         // Ill-formed input. 
                         // Might wanna error
