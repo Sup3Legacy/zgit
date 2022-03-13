@@ -8,12 +8,19 @@ const debug = std.debug;
 const io = std.io;
 
 pub fn main() anyerror!void {
-    var parser = config.ConfigParser.new(std.heap.ArenaAllocator.init(std.heap.page_allocator).allocator());
-    parser.get("Vêtements").set("Chaussure", "Sôssure");
-    parser.get("Vêtements").set("Haut", "Veston trécher");
-    parser.get("Accessoires").set("Sakamain", "Pochette élégante");
+    var alloc = std.heap.ArenaAllocator.init(std.heap.page_allocator).allocator();
+    var parser = config.ConfigParser.new(alloc);
+    //parser.get("Vêtements").set("Chaussure", "Sôssure");
+    //parser.get("Vêtements").set("Haut", "Veston trécher");
+    //parser.get("Accessoires").set("Sakamain", "Pochette élégante");
+    //parser.write(std.io.getStdOut().writer());
+    //_ = parser;
+
+    //parser = config.ConfigParser.new(alloc);
+    
+    parser.read_file("/home/cst1/Documents/Projets/zgit/src/lib/test.conf");
     parser.write(std.io.getStdOut().writer());
-    _ = parser;
+
     const params = comptime [_]clap.Param(clap.Help){
         clap.parseParam("commit     Commit all changes") catch unreachable,
     };
