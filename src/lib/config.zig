@@ -92,6 +92,13 @@ pub const ConfigParser = struct {
         }) catch unreachable;
         this.read(file.reader());
     }
+
+    pub fn free(this: *@This()) void {
+        for (this.children.keys()) |k| {
+            this.children.getPtr(k).?.children.deinit();
+        }
+        this.children.deinit();
+    }
 };
 
 pub const Title = struct {
