@@ -14,7 +14,8 @@ pub fn build(b: *std.build.Builder) void {
 
     const exe = b.addExecutable("zgit", "src/main.zig");
     exe.setTarget(target);
-    exe.setBuildMode(std.builtin.Mode.ReleaseSafe);
+    //exe.setBuildMode(std.builtin.Mode.ReleaseSafe);
+    exe.setBuildMode(std.builtin.Mode.Debug);
     pkgs.addAllTo(exe);
     exe.install();
 
